@@ -1,5 +1,5 @@
 getwd()
-setwd("/Users/domi_bryan/Library/CloudStorage/OneDrive-NationalUniversityofSingapore/Citadel/Clean Obesity Data")
+setwd("./Clean Obesity Data")
 
 # Main CLEANED Dataset
 obesity <- read.csv("obesity.csv")
