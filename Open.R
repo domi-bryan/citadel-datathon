@@ -1,5 +1,5 @@
 # ===== OBESITY DATA =====
-setwd("./Clean Obesity Data")
+setwd("../Clean Obesity Data")
 
 # Main Cleaned Dataset
 obesity <- read.csv("obesity.csv")
@@ -56,7 +56,7 @@ dailyFruitAdults <- read.csv("dailyFruitAdults.csv")
 dailyVegAdults <- read.csv("dailyVegAdults.csv")
 
 # ===== MEAT AND LIVESTOCK DATA =====
-setwd("./Clean Meat Consumption Data")
+setwd("../Clean Meat Consumption Data")
 
 # Red Meat and Poultry Production
 meatProduction <- read.csv("meatProduction.csv")
@@ -71,10 +71,10 @@ slaughterWeight <- read.csv("slaughterWeight.csv")
 coldStorage <- read.csv("coldStorage.csv")
 
 # ===== STOCK MARKET DATA =====
-setwd("./Clean Stock and Commodities Data")
+setwd("../Clean Stock and Commodities Data")
 
 # Stocks & ETFs
-stocks <- read.csv("stocks.csv")
+stock <- read.csv("stock.csv")
 
 # Commodities
 commodities <- read.csv("commodities.csv")
@@ -83,7 +83,7 @@ commodities <- read.csv("commodities.csv")
 description <- read.csv("description.csv")
 
 # ===== AMERICAN COMMUNITY SURVEY DATA =====
-setwd("./Clean ACS Data")
+setwd("../Clean ACS Data")
 
 # Main Cleaned Dataset
 acs <- read.csv("acs.csv")
@@ -111,3 +111,4 @@ occupation <- read.csv("occupation.csv")
 
 # Year on Year Nominal Income in Various Categories
 nominalIncome <- read.csv("nominalIncome.csv")
+

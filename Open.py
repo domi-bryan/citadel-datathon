@@ -2,7 +2,7 @@ import pandas as pd
 import os
 
 # ===== OBESITY DATA =====
-os.chdir('../citadel-datathon/Clean Obesity Data/')
+os.chdir('./Clean Obesity Data/')
 
 # Main Cleaned Dataset
 obesity = pd.read_csv("obesity.csv")
@@ -59,7 +59,7 @@ dailyFruitAdults = pd.read_csv("dailyFruitAdults.csv")
 dailyVegAdults = pd.read_csv("dailyVegAdults.csv")
 
 # ===== MEAT AND LIVESTOCK DATA =====
-os.chdir('../citadel-datathon/Clean Meat Consumption Data/')
+os.chdir('../Clean Meat Consumption Data/')
 
 # Red Meat and Poultry Production
 meatProduction = pd.read_csv("meatProduction.csv")
@@ -74,10 +74,10 @@ slaughterWeight = pd.read_csv("slaughterWeight.csv")
 coldStorage = pd.read_csv("coldStorage.csv")
 
 # ===== STOCK MARKET DATA =====
-os.chdir('../citadel-datathon/Clean Stock and Commodities Data/')
+os.chdir('../Clean Stock and Commodities Data/')
 
 # Stocks & ETFs
-stocks = pd.read_csv("stocks.csv")
+stock = pd.read_csv("stock.csv")
 
 # Commodities
 commodities = pd.read_csv("commodities.csv")
@@ -86,7 +86,7 @@ commodities = pd.read_csv("commodities.csv")
 description = pd.read_csv("description.csv")
 
 # ===== AMERICAN COMMUNITY SURVEY DATA =====
-os.chdir('../citadel-datathon/Clean ACS Data/')
+os.chdir('../Clean ACS Data/')
 
 # Main Cleaned Dataset
 acs = pd.read_csv("acs.csv")
