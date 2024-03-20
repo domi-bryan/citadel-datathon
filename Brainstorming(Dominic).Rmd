@@ -13,11 +13,12 @@ library(knitr)
 library(psych)
 library(rpivotTable)
 library(ggplot2)
-library(maps)
+library(usmap)
 dailyActivityKids <- read.csv("dailyActivityKids.csv")
 ```
 
 ## Pivot table for messing around
+
 ```{r pivotTable, echo = TRUE}
 rpivotTable(dailyActivityKids)
 ```
@@ -27,71 +28,588 @@ rpivotTable(dailyActivityKids)
 ### Classification By Gender
 
 ```{r dailyActivityKids, echo = TRUE}
-dailyActivityKidsGender <- dailyActivityKids %>% filter (StratificationCategoryId1 == "GEN")
+dailyActivityKidsGender <- dailyActivityKids %>% 
+  filter (StratificationCategoryId1 == "GEN") %>% 
+  filter (LocationAbbr == "US") %>% 
+  select(Year, Gender, Data_Value)
 
-avgActivityKidsGender <- dailyActivityKidsGender %>%
-  group_by(Year, Gender) %>%
-  summarise(avg_Data_Value = mean(Data_Value, na.rm = TRUE))
+# dailyActivityKidsGenderAdd <- dailyActivityKids %>% 
+#   filter(StratificationCategoryId1 == "GEN") %>%
+#   filter (LocationAbbr != "US") %>% 
+#   filter(Year < 2011) %>% 
+#   group_by(Year, Gender) %>% 
+#   summarise(Data_Value = weighted.mean(Data_Value, Sample_Size, na.rm = TRUE))
+# 
+# dailyActivityKidsGender <- rbind(dailyActivityKidsGender, dailyActivityKidsGenderAdd)
 
-physicalActivityYoY <- ggplot(avgActivityKidsGender, aes(x = Year, y = avg_Data_Value, color = Gender)) +
+ggplot(dailyActivityKidsGender, aes(x = Year, y = Data_Value, color = Gender)) +
   geom_line() +
   geom_point() +
-  geom_text(aes(label = round(avg_Data_Value, 2)), vjust = -0.5) +
+  geom_text(aes(label = round(Data_Value, 2)), vjust = -0.5) +
   labs(x = "Year", y = "Average Data Value", title = "Average Percent of Physically Active Kids Aged 9-12 by Gender") +
-  scale_x_continuous(breaks = avgActivityKidsGender$Year,
-                     labels = avgActivityKidsGender$Year)
-
-physicalActivityYoY
+  scale_x_continuous(breaks = dailyActivityKidsGender$Year,
+                     labels = dailyActivityKidsGender$Year)
 ```
 
 ### Classification by Grade
 
 ```{r dailyActivityKids, echo = TRUE}
-dailyActivityKidsGrade <- dailyActivityKids %>% filter (StratificationCategoryId1 == "GRADE")
+dailyActivityKidsGrade <- dailyActivityKids %>% 
+  filter (StratificationCategoryId1 == "GRADE") %>% 
+  filter (LocationAbbr == "US") %>% 
+  select(Year, Grade, Data_Value)
 
-avgActivityKidsGrade <- dailyActivityKidsGrade %>%
-  group_by(Year, Grade) %>%
-  summarise(avg_Data_Value = mean(Data_Value, na.rm = TRUE))
+# dailyActivityKidsGradeAdd <- dailyActivityKids %>% 
+#   filter(StratificationCategoryId1 == "GRADE") %>% 
+#   filter(Year < 2011) %>% 
+#   group_by(Year, Grade) %>% 
+#   summarise(Data_Value = mean(Data_Value, na.rm = TRUE))
+# 
+# dailyActivityKidsGrade <- rbind(dailyActivityKidsGrade, dailyActivityKidsGradeAdd)
 
-physicalActivityYoY <- ggplot(avgActivityKidsGender, aes(x = Year, y = avg_Data_Value, color = Grade)) +
+ggplot(dailyActivityKidsGrade, aes(x = Year, y = Data_Value, color = Grade)) +
   geom_line() +
   geom_point() +
-  geom_text(aes(label = round(avg_Data_Value, 2)), vjust = -0.5) +
+  geom_text(aes(label = round(Data_Value, 2)), vjust = -0.5) +
   labs(x = "Year", y = "Average Data Value", title = "Average Percent of Physically Active Kids Aged 9-12 by Grade") +
-  scale_x_continuous(breaks = avgActivityKidsGrade$Year,
-                     labels = avgActivityKidsGrade$Year)
-
-physicalActivityYoY
+  scale_x_continuous(breaks = dailyActivityKidsGrade$Year,
+                     labels = dailyActivityKidsGrade$Year)
 ```
 
-### Classification by Ethnicity (Nothing Useful)
+### Classification by Ethnicity
 
 ```{r dailyActivityKids, echo = TRUE}
-dailyActivityKidsEth <- dailyActivityKids %>% filter (StratificationCategoryId1 == "RACE")
+dailyActivityKidsRace <- dailyActivityKids %>% 
+  filter (StratificationCategoryId1 == "RACE") %>% 
+  filter (LocationAbbr == "US")
 
-avgActivityKidsEth <- dailyActivityKidsEth %>%
-  group_by(Year, Race.Ethnicity) %>%
-  summarise(avg_Data_Value = mean(Data_Value, na.rm = TRUE))
-
-physicalActivityYoY <- ggplot(avgActivityKidsEth, aes(x = Year, y = avg_Data_Value, color = Race.Ethnicity)) +
+physicalActivityYoYRace <- ggplot(dailyActivityKidsRace, aes(x = Year, y = Data_Value, color = Race.Ethnicity)) +
   geom_line() +
   geom_point() +
-  geom_text(aes(label = round(avg_Data_Value, 2)), vjust = -0.5) +
+  geom_text(aes(label = round(Data_Value, 2)), vjust = -0.5) +
   labs(x = "Year", y = "Average Data Value", title = "Average Percent of Physically Active Kids Aged 9-12 by Ethnicity") +
-  scale_x_continuous(breaks = avgActivityKidsEth$Year,
-                     labels = avgActivityKidsEth$Year)
+  scale_x_continuous(breaks = dailyActivityKidsRace$Year,
+                     labels = dailyActivityKidsRace$Year)
 
-physicalActivityYoY
+physicalActivityYoYRace
 ```
 
-### Classification by State (Unsure whether any of this is useful)
+### Classification by State (Nothing Useful)
 
 ```{r dailyActivityKids, echo = TRUE}
-dailyActivityKidsState <- dailyActivityKids %>% filter (StratificationCategoryId1 == "OVR")
+dailyActivityKidsState <- dailyActivityKids %>% 
+  filter (StratificationCategoryId1 == "OVR") %>% 
+  filter (LocationAbbr != "US")
 
 avgActivityKidsState <- dailyActivityKidsState %>%
   group_by(LocationAbbr, Year) %>%
   summarise(avg_Data_Value = mean(Data_Value, na.rm = TRUE)) %>%
   ungroup() %>%
-  pivot_wider(names_from = Year, values_from = avg_Data_Value, names_prefix = "avg_")
+  pivot_wider(names_from = Year, values_from = avg_Data_Value, names_prefix = "avg_") %>% 
+  rename(state = LocationAbbr)
+
+plot_usmap(data = avgActivityKidsState, 
+           regions = "states", 
+           values = "avg_2019") +
+  theme(legend.position = "right") +
+  ggtitle("Average Percent of Physically Active Kids Aged 9-12 in 2019 by State")  # Add title
+
 ```
+
+
+## Obesity Rate for children aged 9-12 over the years
+### Classification By Gender (There is a dip.. Why?)
+
+```{r dailyActivityKids, echo = TRUE}
+obRateKidsGender <- obRateKids %>% 
+  filter (StratificationCategoryId1 == "GEN") %>% 
+  filter (LocationAbbr == "US")
+
+ggplot(obRateKidsGender, aes(x = Year, y = Data_Value, color = Gender)) +
+  geom_line() +
+  geom_point() +
+  geom_text(aes(label = round(Data_Value, 2)), vjust = -0.5) +
+  labs(x = "Year", y = "Average Data Value", title = "Average Obesity Rate Aged 9-12 by Gender") +
+  scale_x_continuous(breaks = obRateKidsGender$Year,
+                     labels = obRateKidsGender$Year)
+```
+
+### Classification by Grade
+
+```{r dailyActivityKids, echo = TRUE}
+obRateKidsGrade <- obRateKids %>% 
+  filter (StratificationCategoryId1 == "GRADE") %>% 
+  filter (LocationAbbr == "US")
+
+ggplot(obRateKidsGrade, aes(x = Year, y = Data_Value, color = Grade)) +
+  geom_line() +
+  geom_point() +
+  geom_text(aes(label = round(Data_Value, 2)), vjust = -0.5) +
+  labs(x = "Year", y = "Average Data Value", title = "Average Obesity Rate Aged 9-12 by Grade") +
+  scale_x_continuous(breaks = obRateKidsGrade$Year,
+                     labels = obRateKidsGrade$Year)
+```
+
+### Classification by Ethnicity (A lot of Incomplete Data)
+
+```{r dailyActivityKids, echo = TRUE}
+obRateKidsRace <- obRateKids %>% 
+  filter (StratificationCategoryId1 == "RACE") %>% 
+  filter (LocationAbbr == "US")
+
+ggplot(obRateKidsRace, aes(x = Year, y = Data_Value, color = Race.Ethnicity)) +
+  geom_line() +
+  geom_point() +
+  geom_text(aes(label = round(Data_Value, 2)), vjust = -0.5) +
+  labs(x = "Year", y = "Average Data Value", title = "Average Obesity Rate Aged 9-12 by Race") +
+  scale_x_continuous(breaks = obRateKidsRace$Year,
+                     labels = obRateKidsRace$Year)
+```
+
+### Classification by State (Nothing Useful)
+
+```{r dailyActivityKids, echo = TRUE}
+obRateKidsState <- obRateKids %>% 
+  filter (StratificationCategoryId1 == "OVR") %>% 
+  filter (LocationAbbr != "US")
+
+avgObRateKidsState <- obRateKidsState %>%
+  group_by(LocationAbbr, Year) %>%
+  summarise(avg_Data_Value = mean(Data_Value, na.rm = TRUE)) %>%
+  ungroup() %>%
+  pivot_wider(names_from = Year, values_from = avg_Data_Value, names_prefix = "avg_") %>% 
+  rename(state = LocationAbbr)
+
+plot_usmap(data = avgObRateKidsState, 
+           regions = "states", 
+           values = "avg_2019") +
+  theme(legend.position = "right") +
+  ggtitle("Average Obesity Rate in Kids Aged 9-12 in 2019 by State")  # Add title
+```
+
+
+## Percent of students in grades 9-12 who participate in daily physical education
+### Classification By Gender
+
+```{r dailyActivityKids, echo = TRUE}
+dailyPEKidsGender <- dailyPEKids %>% 
+  filter (StratificationCategoryId1 == "GEN") %>% 
+  filter (LocationAbbr == "US")
+
+ggplot(dailyPEKidsGender, aes(x = Year, y = Data_Value, color = Gender)) +
+  geom_line() +
+  geom_point() +
+  geom_text(aes(label = round(Data_Value, 2)), vjust = -0.5) +
+  labs(x = "Year", y = "Average Data Value", title = "Average Daily PE Participation Rate Aged 9-12 by Gender") +
+  scale_x_continuous(breaks = dailyPEKidsGender$Year,
+                     labels = dailyPEKidsGender$Year)
+```
+
+### Classification by Grade
+
+```{r dailyActivityKids, echo = TRUE}
+dailyPEKidsGrade <- dailyPEKids %>% 
+  filter (StratificationCategoryId1 == "GRADE") %>% 
+  filter (LocationAbbr == "US")
+
+ggplot(dailyPEKidsGrade, aes(x = Year, y = Data_Value, color = Grade)) +
+  geom_line() +
+  geom_point() +
+  geom_text(aes(label = round(Data_Value, 2)), vjust = -0.5) +
+  labs(x = "Year", y = "Average Data Value", title = "Average Daily PE Participation Rate Aged 9-12 by Grade") +
+  scale_x_continuous(breaks = dailyPEKidsGrade$Year,
+                     labels = dailyPEKidsGrade$Year)
+```
+
+### Classification by Ethnicity (Better to Filter by Specific Race)
+
+```{r dailyActivityKids, echo = TRUE}
+dailyPEKidsRace <- dailyPEKids %>% 
+  filter (StratificationCategoryId1 == "RACE") %>% 
+  filter (LocationAbbr == "US")
+
+ggplot(dailyPEKidsRace, aes(x = Year, y = Data_Value, color = Race.Ethnicity)) +
+  geom_line() +
+  geom_point() +
+  geom_text(aes(label = round(Data_Value, 2)), vjust = -0.5) +
+  labs(x = "Year", y = "Average Data Value", title = "Average Daily PE Participation Rate Aged 9-12 by Race") +
+  scale_x_continuous(breaks = dailyPEKidsRace$Year,
+                     labels = dailyPEKidsRace$Year)
+```
+
+### Classification by State (Nothing Useful)
+
+```{r dailyActivityKids, echo = TRUE}
+dailyPEKidsState <- dailyPEKids %>% 
+  filter (StratificationCategoryId1 == "OVR") %>% 
+  filter (LocationAbbr != "US")
+
+avgdailyPEKidsState <- dailyPEKidsState %>%
+  group_by(LocationAbbr, Year) %>%
+  summarise(avg_Data_Value = mean(Data_Value, na.rm = TRUE)) %>%
+  ungroup() %>%
+  pivot_wider(names_from = Year, values_from = avg_Data_Value, names_prefix = "avg_") %>% 
+  rename(state = LocationAbbr)
+
+plot_usmap(data = avgdailyPEKidsState, 
+           regions = "states", 
+           values = "avg_2019") +
+  theme(legend.position = "right") +
+  ggtitle("Average Daily PE Participation Rate in Kids Aged 9-12 in 2019 by State")  # Add title
+```
+
+
+## Overweight Rate for children aged 9-12 over the years
+### Classification By Gender (There is a dip.. Why?)
+
+```{r dailyActivityKids, echo = TRUE}
+owRateKidsGender <- owRateKids %>% 
+  filter (StratificationCategoryId1 == "GEN") %>% 
+  filter (LocationAbbr == "US")
+
+ggplot(owRateKidsGender, aes(x = Year, y = Data_Value, color = Gender)) +
+  geom_line() +
+  geom_point() +
+  geom_text(aes(label = round(Data_Value, 2)), vjust = -0.5) +
+  labs(x = "Year", y = "Average Data Value", title = "Average Overweight Rate Aged 9-12 by Gender") +
+  scale_x_continuous(breaks = owRateKidsGender$Year,
+                     labels = owRateKidsGender$Year)
+```
+
+### Classification by Grade
+
+```{r dailyActivityKids, echo = TRUE}
+owRateKidsGrade <- owRateKids %>% 
+  filter (StratificationCategoryId1 == "GRADE") %>% 
+  filter (LocationAbbr == "US")
+
+ggplot(owRateKidsGrade, aes(x = Year, y = Data_Value, color = Grade)) +
+  geom_line() +
+  geom_point() +
+  geom_text(aes(label = round(Data_Value, 2)), vjust = -0.5) +
+  labs(x = "Year", y = "Average Data Value", title = "Average Overweight Rate Aged 9-12 by Grade") +
+  scale_x_continuous(breaks = owRateKidsGrade$Year,
+                     labels = owRateKidsGrade$Year)
+```
+
+### Classification by Ethnicity (A lot of Incomplete Data)
+
+```{r dailyActivityKids, echo = TRUE}
+owRateKidsRace <- owRateKids %>% 
+  filter (StratificationCategoryId1 == "RACE") %>% 
+  filter (LocationAbbr == "US")
+
+ggplot(owRateKidsRace, aes(x = Year, y = Data_Value, color = Race.Ethnicity)) +
+  geom_line() +
+  geom_point() +
+  geom_text(aes(label = round(Data_Value, 2)), vjust = -0.5) +
+  labs(x = "Year", y = "Average Data Value", title = "Average Obesity Rate Aged 9-12 by Race") +
+  scale_x_continuous(breaks = owRateKidsRace$Year,
+                     labels = owRateKidsRace$Year)
+```
+
+### Classification by State (Nothing Useful)
+
+```{r dailyActivityKids, echo = TRUE}
+owRateKidsState <- owRateKids %>% 
+  filter (StratificationCategoryId1 == "OVR") %>% 
+  filter (LocationAbbr != "US")
+
+avgowRateKidsState <- owRateKidsState %>%
+  group_by(LocationAbbr, Year) %>%
+  summarise(avg_Data_Value = mean(Data_Value, na.rm = TRUE)) %>%
+  ungroup() %>%
+  pivot_wider(names_from = Year, values_from = avg_Data_Value, names_prefix = "avg_") %>% 
+  rename(state = LocationAbbr)
+
+plot_usmap(data = avgowRateKidsState, 
+           regions = "states", 
+           values = "avg_2019") +
+  theme(legend.position = "right") +
+  ggtitle("Average Obesity Rate in Kids Aged 9-12 in 2019 by State")  # Add title
+```
+
+## Percent of students in grades 9-12 who drank regular soda/pop at least one time per day (Turns out this has been decreasing!)
+### Classification By Gender
+
+```{r dailyActivityKids, echo = TRUE}
+dailySodaKidsGender <- dailySodaKids %>% 
+  filter (StratificationCategoryId1 == "GEN") %>% 
+  filter (LocationAbbr == "US")
+
+ggplot(dailySodaKidsGender, aes(x = Year, y = Data_Value, color = Gender)) +
+  geom_line() +
+  geom_point() +
+  geom_text(aes(label = round(Data_Value, 2)), vjust = -0.5) +
+  labs(x = "Year", y = "Average Data Value", title = "Average Daily Percent of kids who drink soda regularly Aged 9-12 by Gender") +
+  scale_x_continuous(breaks = dailySodaKidsGender$Year,
+                     labels = dailySodaKidsGender$Year)
+```
+
+### Classification by Grade
+
+```{r dailyActivityKids, echo = TRUE}
+dailySodaKidsGrade <- dailySodaKids %>% 
+  filter (StratificationCategoryId1 == "GRADE") %>% 
+  filter (LocationAbbr == "US")
+
+ggplot(dailySodaKidsGrade, aes(x = Year, y = Data_Value, color = Grade)) +
+  geom_line() +
+  geom_point() +
+  geom_text(aes(label = round(Data_Value, 2)), vjust = -0.5) +
+  labs(x = "Year", y = "Average Data Value", title = "Average Daily Percent of kids who drink soda regularly Aged 9-12 by Grade") +
+  scale_x_continuous(breaks = dailySodaKidsGrade$Year,
+                     labels = dailySodaKidsGrade$Year)
+```
+
+### Classification by Ethnicity (Better to Filter by Specific Race)
+
+```{r dailyActivityKids, echo = TRUE}
+dailySodaKidsRace <- dailySodaKids %>% 
+  filter (StratificationCategoryId1 == "RACE") %>% 
+  filter (LocationAbbr == "US")
+
+ggplot(dailySodaKidsRace, aes(x = Year, y = Data_Value, color = Race.Ethnicity)) +
+  geom_line() +
+  geom_point() +
+  geom_text(aes(label = round(Data_Value, 2)), vjust = -0.5) +
+  labs(x = "Year", y = "Average Data Value", title = "Average Daily Percent of kids who drink soda regularly Aged 9-12 by Race") +
+  scale_x_continuous(breaks = dailySodaKidsRace$Year,
+                     labels = dailySodaKidsRace$Year)
+```
+
+### Classification by State (Nothing Useful)
+
+```{r dailyActivityKids, echo = TRUE}
+dailySodaKidsState <- dailySodaKids %>% 
+  filter (StratificationCategoryId1 == "OVR") %>% 
+  filter (LocationAbbr != "US")
+
+avgdailySodaKidsState <- dailySodaKidsState %>%
+  group_by(LocationAbbr, Year) %>%
+  summarise(avg_Data_Value = mean(Data_Value, na.rm = TRUE)) %>%
+  ungroup() %>%
+  pivot_wider(names_from = Year, values_from = avg_Data_Value, names_prefix = "avg_") %>% 
+  rename(state = LocationAbbr)
+
+plot_usmap(data = avgdailySodaKidsState, 
+           regions = "states", 
+           values = "avg_2019") +
+  theme(legend.position = "right") +
+  ggtitle("Average Daily Percent of kids who drink soda regularly in Kids Aged 9-12 in 2019 by State")  # Add title
+```
+
+## Percent of students in grades 9-12 who consume vegetables less than 1 time daily (Turns out this has been increasing!)
+### Classification By Gender
+
+```{r dailyActivityKids, echo = TRUE}
+dailyVegKidsGender <- dailyVegKids %>% 
+  filter (StratificationCategoryId1 == "GEN") %>% 
+  filter (LocationAbbr == "US")
+
+ggplot(dailyVegKidsGender, aes(x = Year, y = Data_Value, color = Gender)) +
+  geom_line() +
+  geom_point() +
+  geom_text(aes(label = round(Data_Value, 2)), vjust = -0.5) +
+  labs(x = "Year", y = "Average Data Value", title = "Average Percent of Kids who do not eat vegetable regularly Aged 9-12 by Gender") +
+  scale_x_continuous(breaks = dailyVegKidsGender$Year,
+                     labels = dailyVegKidsGender$Year)
+```
+
+### Classification by Grade
+
+```{r dailyActivityKids, echo = TRUE}
+dailyVegKidsGrade <- dailyVegKids %>% 
+  filter (StratificationCategoryId1 == "GRADE") %>% 
+  filter (LocationAbbr == "US")
+
+ggplot(dailyVegKidsGrade, aes(x = Year, y = Data_Value, color = Grade)) +
+  geom_line() +
+  geom_point() +
+  geom_text(aes(label = round(Data_Value, 2)), vjust = -0.5) +
+  labs(x = "Year", y = "Average Data Value", title = "Average Percent of Kids who do not eat vegetable regularly Aged 9-12 by Grade") +
+  scale_x_continuous(breaks = dailyVegKidsGrade$Year,
+                     labels = dailyVegKidsGrade$Year)
+```
+
+### Classification by Ethnicity (Better to Filter by Specific Race)
+
+```{r dailyActivityKids, echo = TRUE}
+dailyVegKidsRace <- dailyVegKids %>% 
+  filter (StratificationCategoryId1 == "RACE") %>% 
+  filter (LocationAbbr == "US")
+
+ggplot(dailyVegKidsRace, aes(x = Year, y = Data_Value, color = Race.Ethnicity)) +
+  geom_line() +
+  geom_point() +
+  geom_text(aes(label = round(Data_Value, 2)), vjust = -0.5) +
+  labs(x = "Year", y = "Average Data Value", title = "Average Percent of Kids who do not eat vegetable regularly Aged 9-12 by Race") +
+  scale_x_continuous(breaks = dailyVegKidsRace$Year,
+                     labels = dailyVegKidsRace$Year)
+```
+
+### Classification by State (Nothing Useful)
+
+```{r dailyActivityKids, echo = TRUE}
+dailyVegKidsState <- dailyVegKids %>% 
+  filter (StratificationCategoryId1 == "OVR") %>% 
+  filter (LocationAbbr != "US")
+
+avgdailyVegKidsState <- dailyVegKidsState %>%
+  group_by(LocationAbbr, Year) %>%
+  summarise(avg_Data_Value = mean(Data_Value, na.rm = TRUE)) %>%
+  ungroup() %>%
+  pivot_wider(names_from = Year, values_from = avg_Data_Value, names_prefix = "avg_") %>% 
+  rename(state = LocationAbbr)
+
+plot_usmap(data = avgdailyVegKidsState, 
+           regions = "states", 
+           values = "avg_2019") +
+  theme(legend.position = "right") +
+  ggtitle("Average Percent of Kids who do not eat vegetable regularly in Kids Aged 9-12 in 2019 by State")  
+```
+
+
+
+## Percent of students in grades 9-12 who consume fruit less than 1 time daily (Turns out this has been increasing!)
+### Classification By Gender
+
+```{r dailyActivityKids, echo = TRUE}
+dailyFruitKidsGender <- dailyFruitKids %>% 
+  filter (StratificationCategoryId1 == "GEN") %>% 
+  filter (LocationAbbr == "US")
+
+ggplot(dailyFruitKidsGender, aes(x = Year, y = Data_Value, color = Gender)) +
+  geom_line() +
+  geom_point() +
+  geom_text(aes(label = round(Data_Value, 2)), vjust = -0.5) +
+  labs(x = "Year", y = "Average Data Value", title = "Average Percent of Kids who do not eat Fruit regularly Aged 9-12 by Gender") +
+  scale_x_continuous(breaks = dailyFruitKidsGender$Year,
+                     labels = dailyFruitKidsGender$Year)
+```
+
+### Classification by Grade
+
+```{r dailyActivityKids, echo = TRUE}
+dailyFruitKidsGrade <- dailyFruitKids %>% 
+  filter (StratificationCategoryId1 == "GRADE") %>% 
+  filter (LocationAbbr == "US")
+
+ggplot(dailyFruitKidsGrade, aes(x = Year, y = Data_Value, color = Grade)) +
+  geom_line() +
+  geom_point() +
+  geom_text(aes(label = round(Data_Value, 2)), vjust = -0.5) +
+  labs(x = "Year", y = "Average Data Value", title = "Average Percent of Kids who do not eat Fruit regularly Aged 9-12 by Grade") +
+  scale_x_continuous(breaks = dailyFruitKidsGrade$Year,
+                     labels = dailyFruitKidsGrade$Year)
+```
+
+### Classification by Ethnicity (Better to Filter by Specific Race)
+
+```{r dailyActivityKids, echo = TRUE}
+dailyFruitKidsRace <- dailyFruitKids %>% 
+  filter (StratificationCategoryId1 == "RACE") %>% 
+  filter (LocationAbbr == "US")
+
+ggplot(dailyFruitKidsRace, aes(x = Year, y = Data_Value, color = Race.Ethnicity)) +
+  geom_line() +
+  geom_point() +
+  geom_text(aes(label = round(Data_Value, 2)), vjust = -0.5) +
+  labs(x = "Year", y = "Average Data Value", title = "Average Percent of Kids who do not eat Fruit regularly Aged 9-12 by Race") +
+  scale_x_continuous(breaks = dailyFruitKidsRace$Year,
+                     labels = dailyFruitKidsRace$Year)
+```
+
+### Classification by State (Nothing Useful)
+
+```{r dailyActivityKids, echo = TRUE}
+dailyFruitKidsState <- dailyFruitKids %>% 
+  filter (StratificationCategoryId1 == "OVR") %>% 
+  filter (LocationAbbr != "US")
+
+avgdailyFruitKidsState <- dailyFruitKidsState %>%
+  group_by(LocationAbbr, Year) %>%
+  summarise(avg_Data_Value = mean(Data_Value, na.rm = TRUE)) %>%
+  ungroup() %>%
+  pivot_wider(names_from = Year, values_from = avg_Data_Value, names_prefix = "avg_") %>% 
+  rename(state = LocationAbbr)
+
+plot_usmap(data = avgdailyFruitKidsState, 
+           regions = "states", 
+           values = "avg_2019") +
+  theme(legend.position = "right") +
+  ggtitle("Average Percent of Kids who do not eat Fruit regularly in Kids Aged 9-12 in 2019 by State")  
+```
+
+
+
+## Percent of students in grades 9-12 who are watching 3 or more hours of television each school day
+### Classification By Gender
+
+```{r dailyActivityKids, echo = TRUE}
+dailyTVKidsGender <- dailyTVKids %>% 
+  filter (StratificationCategoryId1 == "GEN") %>% 
+  filter (LocationAbbr == "US")
+
+ggplot(dailyTVKidsGender, aes(x = Year, y = Data_Value, color = Gender)) +
+  geom_line() +
+  geom_point() +
+  geom_text(aes(label = round(Data_Value, 2)), vjust = -0.5) +
+  labs(x = "Year", y = "Average Data Value", title = "Average Percent of Kids who watch TV for 3 or more hours Aged 9-12 by Gender") +
+  scale_x_continuous(breaks = dailyTVKidsGender$Year,
+                     labels = dailyTVKidsGender$Year)
+```
+
+### Classification by Grade
+
+```{r dailyActivityKids, echo = TRUE}
+dailyTVKidsGrade <- dailyTVKids %>% 
+  filter (StratificationCategoryId1 == "GRADE") %>% 
+  filter (LocationAbbr == "US")
+
+ggplot(dailyTVKidsGrade, aes(x = Year, y = Data_Value, color = Grade)) +
+  geom_line() +
+  geom_point() +
+  geom_text(aes(label = round(Data_Value, 2)), vjust = -0.5) +
+  labs(x = "Year", y = "Average Data Value", title = "Average Percent of Kids who watch TV for 3 or more hours Aged 9-12 by Grade") +
+  scale_x_continuous(breaks = dailyTVKidsGrade$Year,
+                     labels = dailyTVKidsGrade$Year)
+```
+
+### Classification by Ethnicity (Better to Filter by Specific Race)
+
+```{r dailyActivityKids, echo = TRUE}
+dailyTVKidsRace <- dailyTVKids %>% 
+  filter (StratificationCategoryId1 == "RACE") %>% 
+  filter (LocationAbbr == "US")
+
+ggplot(dailyTVKidsRace, aes(x = Year, y = Data_Value, color = Race.Ethnicity)) +
+  geom_line() +
+  geom_point() +
+  geom_text(aes(label = round(Data_Value, 2)), vjust = -0.5) +
+  labs(x = "Year", y = "Average Data Value", title = "Average Percent of Kids who watch TV for 3 or more hours Aged 9-12 by Race") +
+  scale_x_continuous(breaks = dailyTVKidsRace$Year,
+                     labels = dailyTVKidsRace$Year)
+```
+
+### Classification by State (Nothing Useful)
+
+```{r dailyActivityKids, echo = TRUE}
+dailyTVKidsState <- dailyTVKids %>% 
+  filter (StratificationCategoryId1 == "OVR") %>% 
+  filter (LocationAbbr != "US")
+
+avgdailyTVKidsState <- dailyTVKidsState %>%
+  group_by(LocationAbbr, Year) %>%
+  summarise(avg_Data_Value = mean(Data_Value, na.rm = TRUE)) %>%
+  ungroup() %>%
+  pivot_wider(names_from = Year, values_from = avg_Data_Value, names_prefix = "avg_") %>% 
+  rename(state = LocationAbbr)
+
+plot_usmap(data = avgdailyTVKidsState, 
+           regions = "states", 
+           values = "avg_2019") +
+  theme(legend.position = "right") +
+  ggtitle("Average Percent of Kids who watch TV for 3 or more hours in Kids Aged 9-12 in 2019 by State")  
+```
+
