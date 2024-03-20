@@ -1,0 +1,97 @@
+---
+title: "Brainstorming - Dominic"
+author: "Dominic Bryan"
+date: "2024-03-20"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(tidyr)
+library(knitr)
+library(psych)
+library(rpivotTable)
+library(ggplot2)
+library(maps)
+dailyActivityKids <- read.csv("dailyActivityKids.csv")
+```
+
+## Pivot table for messing around
+```{r pivotTable, echo = TRUE}
+rpivotTable(dailyActivityKids)
+```
+
+## Activity for children aged 9-12 over the years
+
+### Classification By Gender
+
+```{r dailyActivityKids, echo = TRUE}
+dailyActivityKidsGender <- dailyActivityKids %>% filter (StratificationCategoryId1 == "GEN")
+
+avgActivityKidsGender <- dailyActivityKidsGender %>%
+  group_by(Year, Gender) %>%
+  summarise(avg_Data_Value = mean(Data_Value, na.rm = TRUE))
+
+physicalActivityYoY <- ggplot(avgActivityKidsGender, aes(x = Year, y = avg_Data_Value, color = Gender)) +
+  geom_line() +
+  geom_point() +
+  geom_text(aes(label = round(avg_Data_Value, 2)), vjust = -0.5) +
+  labs(x = "Year", y = "Average Data Value", title = "Average Percent of Physically Active Kids Aged 9-12 by Gender") +
+  scale_x_continuous(breaks = avgActivityKidsGender$Year,
+                     labels = avgActivityKidsGender$Year)
+
+physicalActivityYoY
+```
+
+### Classification by Grade
+
+```{r dailyActivityKids, echo = TRUE}
+dailyActivityKidsGrade <- dailyActivityKids %>% filter (StratificationCategoryId1 == "GRADE")
+
+avgActivityKidsGrade <- dailyActivityKidsGrade %>%
+  group_by(Year, Grade) %>%
+  summarise(avg_Data_Value = mean(Data_Value, na.rm = TRUE))
+
+physicalActivityYoY <- ggplot(avgActivityKidsGender, aes(x = Year, y = avg_Data_Value, color = Grade)) +
+  geom_line() +
+  geom_point() +
+  geom_text(aes(label = round(avg_Data_Value, 2)), vjust = -0.5) +
+  labs(x = "Year", y = "Average Data Value", title = "Average Percent of Physically Active Kids Aged 9-12 by Grade") +
+  scale_x_continuous(breaks = avgActivityKidsGrade$Year,
+                     labels = avgActivityKidsGrade$Year)
+
+physicalActivityYoY
+```
+
+### Classification by Ethnicity (Nothing Useful)
+
+```{r dailyActivityKids, echo = TRUE}
+dailyActivityKidsEth <- dailyActivityKids %>% filter (StratificationCategoryId1 == "RACE")
+
+avgActivityKidsEth <- dailyActivityKidsEth %>%
+  group_by(Year, Race.Ethnicity) %>%
+  summarise(avg_Data_Value = mean(Data_Value, na.rm = TRUE))
+
+physicalActivityYoY <- ggplot(avgActivityKidsEth, aes(x = Year, y = avg_Data_Value, color = Race.Ethnicity)) +
+  geom_line() +
+  geom_point() +
+  geom_text(aes(label = round(avg_Data_Value, 2)), vjust = -0.5) +
+  labs(x = "Year", y = "Average Data Value", title = "Average Percent of Physically Active Kids Aged 9-12 by Ethnicity") +
+  scale_x_continuous(breaks = avgActivityKidsEth$Year,
+                     labels = avgActivityKidsEth$Year)
+
+physicalActivityYoY
+```
+
+### Classification by State (Unsure whether any of this is useful)
+
+```{r dailyActivityKids, echo = TRUE}
+dailyActivityKidsState <- dailyActivityKids %>% filter (StratificationCategoryId1 == "OVR")
+
+avgActivityKidsState <- dailyActivityKidsState %>%
+  group_by(LocationAbbr, Year) %>%
+  summarise(avg_Data_Value = mean(Data_Value, na.rm = TRUE)) %>%
+  ungroup() %>%
+  pivot_wider(names_from = Year, values_from = avg_Data_Value, names_prefix = "avg_")
+```
